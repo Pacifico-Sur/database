@@ -1,0 +1,40 @@
+version: "3.0"
+
+services:
+
+  database:
+    image: postgis/postgis:12-3.3-alpine
+    container_name: cont-postgis
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - ./src/siclr_db_respaldo.tar:/docker-entrypoint-initdb.d/siclr_db_respaldo.tar
+      - ./src/psql.sh:/docker-entrypoint-initdb.d/psql.sh
+    networks:
+      network:
+        ipv4_address: 172.16.238.10
+
+  pgadmin:
+    image: dpage/pgadmin4:9.3.0
+    container_name: cont-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "admin@admin.com"
+      PGADMIN_DEFAULT_PASSWORD: "admin"
+    ports:
+      - "8000:80"
+    depends_on:
+      - database
+    networks:
+      network:
+        ipv4_address: 172.16.238.13
+
+networks:
+  network:
+    ipam:
+      driver: default
+      config:
+        - subnet: "172.16.238.0/24"
